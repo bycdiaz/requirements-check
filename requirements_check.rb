@@ -1,13 +1,12 @@
-# require 'fileutils'
 require 'csv'
 
-def collect_ids
-  student_info = Hash.new
+def read_csv
+  student_info = {}
 
   CSV.foreach('data/STU-Student Transcript-ALL-BIOMED_201925.csv', headers: true) do |header|
 
     if !(student_info.include?(header["Univ Id"]))
-      student_info[header["Univ Id"]] = Hash.new
+      student_info[header["Univ Id"]] = {}
 
       student_info[header["Univ Id"]]["Admit Year"] = header["Term Code Admit"]
       student_info[header["Univ Id"]]["Name"] = header["Student"]
@@ -22,12 +21,32 @@ def collect_ids
         student_info[header["Univ Id"]]["Advisor"] = "Elise Bryers"
       end
 
-      # this needs to be in a second run of the CSV
-      student_info["Courses"] = Hash.new
-      student_info["Courses"][header["Crse"]] = header["Grade"]
+      # Creates Courses hash.
+      student_info[header["Univ Id"]]["Courses"] = {}
+
+      # Adds 1st course.
+      if !(student_info[header["Univ Id"]]["Courses"].include?(header["Crse"]))
+        student_info[header["Univ Id"]]["Courses"][header["Crse"]] = {}
+        student_info[header["Univ Id"]]["Courses"][header["Crse"]] = header["Grade"]
+      end
+      
     end
+
+    # Adds all courses
+    if !(student_info[header["Univ Id"]]["Courses"].include?(header["Crse"]))
+      student_info[header["Univ Id"]]["Courses"][header["Crse"]] = {}
+
+      # Identifies Transfer courses
+      if header["GPA Type Ind"] == "T"
+        student_info[header["Univ Id"]]["Courses"][header["Crse"]] = "Transfer"
+      else
+        student_info[header["Univ Id"]]["Courses"][header["Crse"]] = header["Grade"]
+      end
+      
+    end
+
   end
   student_info
 end
 
-print collect_ids
+puts read_csv["11672923"]
