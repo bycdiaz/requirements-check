@@ -5,6 +5,7 @@ def read_csv
 
   CSV.foreach('data/STU-Student Transcript-ALL-BIOMED_201925.csv', headers: true) do |header|
 
+
     if !(student_info.include?(header["Univ Id"]))
       student_info[header["Univ Id"]] = {}
 
@@ -26,21 +27,34 @@ def read_csv
 
       # Adds 1st course.
       if !(student_info[header["Univ Id"]]["Courses"].include?(header["Crse"]))
-        student_info[header["Univ Id"]]["Courses"][header["Crse"]] = {}
-        student_info[header["Univ Id"]]["Courses"][header["Crse"]] = header["Grade"]
+        
+        
+        if header["Crse"] == "N/A"
+        else
+          student_info[header["Univ Id"]]["Courses"][header["Crse"]] = {}
+          if header["GPA Type Ind"] == "T" # Identifies Transfer courses
+            student_info[header["Univ Id"]]["Courses"][header["Crse"]] = "Transfer"
+          else
+            student_info[header["Univ Id"]]["Courses"][header["Crse"]] = header["Grade"]
+          end
+        end
+
       end
       
     end
 
     # Adds all courses
     if !(student_info[header["Univ Id"]]["Courses"].include?(header["Crse"]))
-      student_info[header["Univ Id"]]["Courses"][header["Crse"]] = {}
+      
 
-      # Identifies Transfer courses
-      if header["GPA Type Ind"] == "T"
-        student_info[header["Univ Id"]]["Courses"][header["Crse"]] = "Transfer"
+      if header["Crse"] == "N/A"
       else
-        student_info[header["Univ Id"]]["Courses"][header["Crse"]] = header["Grade"]
+        student_info[header["Univ Id"]]["Courses"][header["Crse"]] = {}
+        if header["GPA Type Ind"] == "T" # Identifies Transfer courses
+          student_info[header["Univ Id"]]["Courses"][header["Crse"]] = "Transfer"
+        else
+          student_info[header["Univ Id"]]["Courses"][header["Crse"]] = header["Grade"]
+        end
       end
       
     end
